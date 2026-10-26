@@ -1,36 +1,58 @@
-from abc import ABC, abstractmethod
-
-
-class Desconto(ABC):
-    @abstractmethod
+class IDesconto:
     def calcular(self, valor: float) -> float:
-        pass
+        raise NotImplementedError
 
 
-class DescontoNormal(Desconto):
+class ICupom:
+    def aplicar_cupom(self, codigo: str) -> bool:
+        raise NotImplementedError
+
+
+class IVIP:
+    def validar_usuario_vip(self, usuario: str) -> bool:
+        raise NotImplementedError
+
+
+class DescontoNormal(IDesconto):
     def calcular(self, valor: float) -> float:
         return valor * 0.1
 
 
-class DescontoVIP(Desconto):
+class DescontoVIP(IDesconto, ICupom, IVIP):
     def calcular(self, valor: float) -> float:
         return valor * 0.2
 
+    def aplicar_cupom(self, codigo: str) -> bool:
+        return True
 
-class DescontoPremium(Desconto):
+    def validar_usuario_vip(self, usuario: str) -> bool:
+        return usuario == "vip"
+
+
+class DescontoPremium(IDesconto):
     def calcular(self, valor: float) -> float:
         return valor * 0.3
 
 
-def main() -> None:
-    valor = 100
-    normal = DescontoNormal()
-    vip = DescontoVIP()
-    premium = DescontoPremium()
-    print(f"Desconto Normal: R$ {normal.calcular(valor):.2f}")
-    print(f"Desconto VIP: R$ {vip.calcular(valor):.2f}")
-    print(f"Desconto Premium: R$ {premium.calcular(valor):.2f}")
+def aplicar_desconto(desconto: IDesconto, valor: float) -> float:
+    return desconto.calcular(valor)
+
+
+def aplicar_cupom(desconto: ICupom, codigo: str) -> bool:
+    return desconto.aplicar_cupom(codigo)
+
+
+class Pedido:
+    def __init__(self, desconto: IDesconto) -> None:
+        self.desconto = desconto
+
+    def total(self, valor: float) -> float:
+        return valor - self.desconto.calcular(valor)
 
 
 if __name__ == "__main__":
-    main()
+    valor = 100
+    pedido_normal = Pedido(DescontoNormal())
+    pedido_vip = Pedido(DescontoVIP())
+    print("Normal:", pedido_normal.total(valor))
+    print("VIP:", pedido_vip.total(valor))
