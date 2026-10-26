@@ -1,15 +1,9 @@
+import abc
+
+
 class IDesconto:
+    @abc.abstractmethod
     def calcular(self, valor: float) -> float:
-        raise NotImplementedError
-
-
-class ICupom:
-    def aplicar_cupom(self, codigo: str) -> bool:
-        raise NotImplementedError
-
-
-class IVIP:
-    def validar_usuario_vip(self, usuario: str) -> bool:
         raise NotImplementedError
 
 
@@ -18,28 +12,14 @@ class DescontoNormal(IDesconto):
         return valor * 0.1
 
 
-class DescontoVIP(IDesconto, ICupom, IVIP):
+class DescontoVIP(IDesconto):
     def calcular(self, valor: float) -> float:
         return valor * 0.2
-
-    def aplicar_cupom(self, codigo: str) -> bool:
-        return True
-
-    def validar_usuario_vip(self, usuario: str) -> bool:
-        return usuario == "vip"
 
 
 class DescontoPremium(IDesconto):
     def calcular(self, valor: float) -> float:
         return valor * 0.3
-
-
-def aplicar_desconto(desconto: IDesconto, valor: float) -> float:
-    return desconto.calcular(valor)
-
-
-def aplicar_cupom(desconto: ICupom, codigo: str) -> bool:
-    return desconto.aplicar_cupom(codigo)
 
 
 class Pedido:
@@ -51,8 +31,9 @@ class Pedido:
 
 
 if __name__ == "__main__":
-    valor = 100
     pedido_normal = Pedido(DescontoNormal())
+    print(pedido_normal.total(100))
     pedido_vip = Pedido(DescontoVIP())
-    print("Normal:", pedido_normal.total(valor))
-    print("VIP:", pedido_vip.total(valor))
+    print(pedido_vip.total(100))
+    pedido_premium = Pedido(DescontoPremium())
+    print(pedido_premium.total(100))
